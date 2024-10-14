@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}Daftar Kunci Aktivasi{% endblock %}
+
+{% block content %}
+
+<!-- Modal untuk menambahkan kunci -->
+<div id="authentication-modal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+    <div class="relative p-4 w-full max-w-md max-h-full">
+        <!-- Konten modal -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+            <!-- Header modal -->
+            <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    Tambah Kunci Aktivasi Baru
+                </h3>
+                <button type="button" class="end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="authentication-modal">
+                    <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                    </svg>
+                    <span class="sr-only">Tutup modal</span>
+                </button>
+            </div>
+            <!-- Badan modal -->
+            <div class="p-4 md:p-5">
+                <form class="space-y-4" action="{% url 'create_key' %}" method="post">
+                    {% csrf_token %}
+                    <div>
+                        <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Nama (Password)</label>
+                        <input type="text" name="name" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Masukkan nama atau password" required />
+                    </div>
+                    <div>
+                        <label for="days" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Jumlah Hari</label>
+                        <input type="number" name="days" id="days" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Masukkan jumlah hari" value="30" required />
+                    </div>
+                    <button type="submit" class="w-full text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Tambah Kunci</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="mb-4 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+    <!-- Modal toggle -->
+    <button data-modal-target="authentication-modal" data-modal-toggle="authentication-modal" class="block text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800" type="button">
+    Add Key
+    </button>
+
+    <div class="relative w-full sm:w-64">
+        <input type="text" id="searchInput" placeholder="Cari key atau nama..." class="border-none rounded-md py-2 px-4 w-full" oninput="searchTable()">
+        <svg class="w-6 h-6 text-gray-500 absolute right-3 top-1/2 transform -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+        </svg>
+    </div>
+</div>
+
+<div class="bg-white shadow-md rounded-lg overflow-hidden">
+    <div class="overflow-x-auto">
+        <table id="keyTable" class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name (Password)</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Key</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Expired</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Is Used</th>
+                    <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for key in keys %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ forloop.counter }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ key.password }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="overflow-x-auto max-w-xs mx-2">
+                                <code class="bg-gray-100 px-2 py-1 rounded mr-2 whitespace-nowrap">{{ key.key }}</code>
+                            </div>
+                            <button onclick="copyToClipboard(this, '{{ key.key }}')" class="bg-gray-200 hover:bg-gray-300 rounded p-1 flex-shrink-0">
+                                <svg class="w-4 h-4 copy-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                </svg>
+                                <svg class="w-4 h-4 check-icon hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if key.expired %}
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">
+                            Ya
+                        </span>
+                        {% else %}
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
+                            Tidak
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if key.is_used %}
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
+                            Ya
+                        </span>
+                        {% else %}
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                            Tidak
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="#" class="text-red-600 hover:text-red-900" onclick="confirmDelete({{ key.id }})">Hapus</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="mt-4 text-right">
+    <p class="text-sm text-gray-600">Jumlah data key: {{ keys|length }}</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+function copyToClipboard(button, text) {
+    navigator.clipboard.writeText(text).then(function() {
+        const copyIcon = button.querySelector('.copy-icon');
+        const checkIcon = button.querySelector('.check-icon');
+        
+        copyIcon.classList.add('hidden');
+        checkIcon.classList.remove('hidden');
+        
+        setTimeout(() => {
+            copyIcon.classList.remove('hidden');
+            checkIcon.classList.add('hidden');
+        }, 2000);
+    }, function(err) {
+        console.error('Gagal menyalin: ', err);
+    });
+}
+
+function confirmDelete(keyId) {
+    Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Anda tidak akan dapat mengembalikan ini!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = "{% url 'delete_key' 0 %}".replace('0', keyId);
+        }
+    })
+}
+
+function searchTable() {
+    const input = document.getElementById('searchInput');
+    const filter = input.value.toUpperCase();
+    const table = document.getElementById('keyTable');
+    const tr = table.getElementsByTagName('tr');
+
+    for (let i = 0; i < tr.length; i++) {
+        const tdName = tr[i].getElementsByTagName('td')[1];
+        const tdKey = tr[i].getElementsByTagName('td')[2];
+        if (tdName || tdKey) {
+            const txtName = tdName.textContent || tdName.innerText;
+            const txtKey = tdKey.textContent || tdKey.innerText;
+            if (txtName.toUpperCase().indexOf(filter) > -1 || txtKey.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = '';
+            } else {
+                tr[i].style.display = 'none';
+            }
+        }
+    }
+}
+</script>
+{% endblock %}
