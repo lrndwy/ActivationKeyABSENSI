@@ -13,6 +13,9 @@ from django.utils import timezone
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 
 from .models import activation_key
 
@@ -47,6 +50,25 @@ def decrypt_data(encrypted_data: str, password: str) -> str:
     fernet = Fernet(key)
     return fernet.decrypt(encrypted).decode()
 
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None and user.is_superuser:
+            login(request, user)
+            return redirect('key_list')
+        else:
+            messages.error(request, 'Username atau password salah!')
+            
+    return render(request, 'login.html')
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')
+
+@method_decorator(login_required(login_url='login'), name='dispatch')
 class EncryptionKeyListView(View):
     def get(self, request):
         keys = activation_key.objects.all()
@@ -66,6 +88,7 @@ class EncryptionKeyListView(View):
         context = {'keys': keys}
         return render(request, 'manager/key_list.html', context)
 
+@method_decorator(login_required(login_url='login'), name='dispatch')
 class CreateEncryptionKeyView(View):
     def post(self, request):
         name = request.POST.get('name')

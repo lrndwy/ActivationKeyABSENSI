@@ -18,6 +18,9 @@
                 <div class="text-xl font-semibold text-gray-700">Activation Key</div>
                 <div class="space-x-4">
                     <a href="{% url 'key_list' %}" class="text-gray-600 hover:text-gray-900">List Kunci</a>
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'logout' %}" class="text-red-600 hover:text-red-800 font-medium">Logout</a>
+                    {% endif %}
                 </div>
             </div>
         </nav>

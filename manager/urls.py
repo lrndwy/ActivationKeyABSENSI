@@ -1,12 +1,13 @@
 from django.urls import path
 
 from manager.views import (ActivateKeyView, CreateEncryptionKeyView,
-                           EncryptionKeyListView, activate_page)
-
-from .views import delete_key
+                           EncryptionKeyListView, activate_page,
+                           login_view, logout_view, delete_key)
 
 urlpatterns = [
-    path('', EncryptionKeyListView.as_view(), name='key_list'),
+    path('', login_view, name='login'),
+    path('logout/', logout_view, name='logout'),
+    path('key_list/', EncryptionKeyListView.as_view(), name='key_list'),
     path('create/', CreateEncryptionKeyView.as_view(), name='create_key'),
     path('activate/', ActivateKeyView.as_view(), name='activate_key'),
     path('activate-page/', activate_page, name='activate_page'),
